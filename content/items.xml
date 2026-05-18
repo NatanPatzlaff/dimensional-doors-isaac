@@ -1,0 +1,3 @@
+<items gfxroot="gfx/items/" version="1">
+	<passive cache="all" description="Opens dimensional doors" gfx="collectibles_portal_gun.png" name="Portal Gun" quality="3" />
+</items>

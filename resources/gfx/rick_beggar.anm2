@@ -1,0 +1,42 @@
+<AnimatedActor>
+	<Info CreatedBy="DimensionalDoors" CreatedOn="07.05.2026" Version="5" Fps="30"/>
+	<Content>
+		<Spritesheets>
+			<Spritesheet Path="rick_beggar.png" Id="0"/>
+		</Spritesheets>
+		<Layers>
+			<Layer Name="Dude" Id="0" SpritesheetId="0"/>
+		</Layers>
+		<Nulls/>
+		<Events/>
+	</Content>
+	<Animations DefaultAnimation="Idle">
+		<Animation Name="Idle" FrameNum="2" Loop="true">
+			<RootAnimation>
+				<Frame XPosition="0" YPosition="0" XScale="100" YScale="100" Delay="2" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255"/>
+			</RootAnimation>
+			<LayerAnimations>
+				<LayerAnimation LayerId="0" Visible="true">
+					<Frame XPosition="0" YPosition="0" XPivot="16" YPivot="32" XCrop="0" YCrop="0" Width="32" Height="32" XScale="130" YScale="130" Delay="30" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255"/>
+					<Frame XPosition="0" YPosition="0" XPivot="16" YPivot="32" XCrop="0" YCrop="32" Width="32" Height="32" XScale="130" YScale="130" Delay="30" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255"/>
+				</LayerAnimation>
+			</LayerAnimations>
+			<NullAnimations/>
+			<Triggers/>
+		</Animation>
+		<Animation Name="Teleport" FrameNum="3" Loop="false">
+			<RootAnimation>
+				<Frame XPosition="0" YPosition="0" XScale="100" YScale="100" Delay="61" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255"/>
+			</RootAnimation>
+			<LayerAnimations>
+				<LayerAnimation LayerId="0" Visible="true">
+					<Frame XPosition="0" YPosition="0" XPivot="16" YPivot="32" XCrop="64" YCrop="0" Width="32" Height="32" XScale="130" YScale="130" Delay="30" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255"/>
+					<Frame XPosition="0" YPosition="0" XPivot="16" YPivot="32" XCrop="0" YCrop="64" Width="32" Height="32" XScale="130" YScale="130" Delay="30" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255"/>
+					<Frame XPosition="0" YPosition="0" XPivot="16" YPivot="32" XCrop="0" YCrop="64" Width="32" Height="32" XScale="0" YScale="0" Delay="1" Visible="false" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="0"/>
+				</LayerAnimation>
+			</LayerAnimations>
+			<NullAnimations/>
+			<Triggers/>
+		</Animation>
+	</Animations>
+</AnimatedActor>

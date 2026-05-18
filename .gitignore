@@ -1,0 +1,6 @@
+# Ignorar imagens brutas na raiz
+/*.png
+
+# Mas garantir que pastas de recursos nao sejam ignoradas
+!/resources/**/*.png
+!/content/**/*.png
