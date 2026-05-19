@@ -13,13 +13,15 @@ local TOUCH_DISTANCE = 40
 
 local function getRickSprite(ent)
     local data = ent:GetData()
-    if not data.rickSprite then
-        data.rickSprite = Sprite()
-        data.rickSprite:Load("gfx/rick_beggar.anm2", true)
-        data.rickSprite:Play("Idle", true)
+    local sprite = ent:GetSprite()
+    
+    if not data.rickInitialized then
+        sprite:Load("gfx/rick_beggar.anm2", true)
+        sprite:Play("Idle", true)
         data.rickState = "idle"
+        data.rickInitialized = true
     end
-    return data.rickSprite, data
+    return sprite, data
 end
 
 local function getPortalSprite(ent)
@@ -195,16 +197,3 @@ mod:AddCallback(ModCallbacks.MC_PRE_SPAWN_CLEAN_AWARD, function()
     end
 end)
 
--- ============================================================
--- RENDER
--- ============================================================
-mod:AddCallback(ModCallbacks.MC_POST_RENDER, function(_)
-    -- Render Rick
-    local ricks = Isaac.FindByType(EntityType.ENTITY_EFFECT, RICK_VARIANT, -1)
-    for _, ent in ipairs(ricks) do
-        local sprite, _ = getRickSprite(ent)
-        local screenPos = Isaac.WorldToScreen(ent.Position)
-        sprite:Render(screenPos, Vector.Zero, Vector.Zero)
-        sprite:Update()
-    end
-end)
