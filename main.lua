@@ -128,6 +128,35 @@ mod:AddCallback(ModCallbacks.MC_POST_UPDATE, function(_)
     end
 end)
 
+-- ROTAÇÃO DOS PORTAIS: Removendo a rotação forçada e deixando o sprite original
+mod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, effect)
+    if effect.Variant == PORTAL_VARIANT then
+        local sprite = effect:GetSprite()
+        if sprite.Rotation ~= 0 then
+            sprite.Rotation = 0
+        end
+    end
+end, PORTAL_VARIANT)
+
+-- COMANDOS PARA TESTE RÁPIDO
+mod:AddCallback(ModCallbacks.MC_EXECUTE_CMD, function(_, cmd)
+    local player = Isaac.GetPlayer(0)
+    if cmd == "rick" then
+        Isaac.Spawn(EntityType.ENTITY_EFFECT, RICK_VARIANT, 0, player.Position, Vector.Zero, nil)
+    elseif cmd == "portais" then
+        -- Mais espalhados e alinhados horizontalmente (apenas no eixo X)
+        local portal1 = Isaac.Spawn(EntityType.ENTITY_EFFECT, PORTAL_VARIANT, 0, player.Position + Vector(-60, 0), Vector.Zero, nil)
+        portal1:GetSprite():Load("gfx/grid/portal_door.anm2", true)
+        portal1:GetSprite():Play("Idle", true)
+        portal1.SortingLayer = SortingLayer.SORTING_BACKGROUND
+        
+        local portal2 = Isaac.Spawn(EntityType.ENTITY_EFFECT, PORTAL_VARIANT, 0, player.Position + Vector(60, 0), Vector.Zero, nil)
+        portal2:GetSprite():Load("gfx/grid/portal_door.anm2", true)
+        portal2:GetSprite():Play("Idle", true)
+        portal2.SortingLayer = SortingLayer.SORTING_BACKGROUND
+    end
+end)
+
 -- ============================================================
 -- SPAWN DAS PORTAS APOS O BOSS
 -- ============================================================
@@ -147,10 +176,10 @@ mod:AddCallback(ModCallbacks.MC_PRE_SPAWN_CLEAN_AWARD, function()
         end
 
         if hasGun then
-            -- Spawna 2 portais no meio da sala
+            -- Spawna 2 portais mais afastados um do outro, alinhados horizontalmente
             local center = room:GetCenterPos()
-            local portal1 = Isaac.Spawn(EntityType.ENTITY_EFFECT, PORTAL_VARIANT, 0, center + Vector(-40, 40), Vector.Zero, nil)
-            local portal2 = Isaac.Spawn(EntityType.ENTITY_EFFECT, PORTAL_VARIANT, 0, center + Vector(40, 40), Vector.Zero, nil)
+            local portal1 = Isaac.Spawn(EntityType.ENTITY_EFFECT, PORTAL_VARIANT, 0, center + Vector(-60, 0), Vector.Zero, nil)
+            local portal2 = Isaac.Spawn(EntityType.ENTITY_EFFECT, PORTAL_VARIANT, 0, center + Vector(60, 0), Vector.Zero, nil)
             
             -- Adiciona os sprites pros portais
             portal1:GetSprite():Load("gfx/grid/portal_door.anm2", true)
