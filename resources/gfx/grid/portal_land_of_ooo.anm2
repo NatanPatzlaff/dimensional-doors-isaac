@@ -2,7 +2,7 @@
 	<Info CreatedBy="DimensionalDoors" CreatedOn="07.05.2026" Version="5" Fps="30"/>
 	<Content>
 		<Spritesheets>
-			<Spritesheet Path="portal_door.png" Id="0"/>
+			<Spritesheet Path="portal_land_of_ooo.png" Id="0"/>
 		</Spritesheets>
 		<Layers>
 			<Layer Name="Door" Id="0" SpritesheetId="0"/>

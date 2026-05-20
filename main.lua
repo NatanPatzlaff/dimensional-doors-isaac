@@ -6,11 +6,16 @@ local function log(msg)
 end
 
 -- ============================================================
--- Configuração do Rick
+-- Configuração
 -- ============================================================
 local RICK_VARIANT = 6660
-local TOUCH_DISTANCE = 40
+local PORTAL_VARIANT = 6661
+local RICK_TOUCH_DISTANCE = 10
+local PORTAL_TOUCH_DISTANCE = 30
 
+-- ============================================================
+-- Rick: Sprite e Lógica
+-- ============================================================
 local function getRickSprite(ent)
     local data = ent:GetData()
     local sprite = ent:GetSprite()
@@ -18,52 +23,134 @@ local function getRickSprite(ent)
     if not data.rickInitialized then
         sprite:Load("gfx/rick_beggar.anm2", true)
         sprite:Play("Idle", true)
+        sprite.FlipX = false
+        sprite.FlipY = false
         data.rickState = "idle"
         data.rickInitialized = true
     end
+    -- Sempre forçar orientação correta
+    sprite.FlipX = false
+    sprite.FlipY = false
     return sprite, data
 end
 
-local function getPortalSprite(ent)
-    local data = ent:GetData()
-    if not data.portalSprite then
-        data.portalSprite = Sprite()
-        data.portalSprite:Load("gfx/grid/portal_door.anm2", true)
-        data.portalSprite:Play("Idle", true)
-    end
-    return data.portalSprite
-end
+-- ============================================================
+-- StageAPI: Definicao dos Novos Andares
+-- ============================================================
+local AdventureDimension = nil
+local DemonDimension = nil
 
--- ============================================================
--- StageAPI: Definicao do Novo Andar
--- ============================================================
-local RickDimension = nil
-local PORTAL_VARIANT = 6661
+-- Carrega os arquivos de sala criados
+local landOfOooRooms = include("rooms.land_of_ooo_rooms")
+local infinityCastleRooms = include("rooms.infinity_castle_rooms")
+
+-- Registra os andares IMEDIATAMENTE quando o mod é lido (não precisa esperar o jogo começar)
+if StageAPI and StageAPI.Loaded then
+    log("StageAPI encontrado. Registrando Custom Stages...")
+    
+    -- Cria a lista de salas
+    local landOfOooRoomsList = StageAPI.RoomsList("LandOfOooRooms", landOfOooRooms)
+    local infinityCastleRoomsList = StageAPI.RoomsList("InfinityCastleRooms", infinityCastleRooms)
+    
+    -- Configuração visual: Land of Ooo
+    local landOfOooBackdrop = {
+        NFloors = {"gfx/backdrop/land_of_ooo/nfloor.png"},
+        LFloors = {"gfx/backdrop/land_of_ooo/lfloor.png"},
+        Walls = {"gfx/backdrop/land_of_ooo/wall.png"},
+        Corners = {"gfx/backdrop/land_of_ooo/corner.png"}
+    }
+    local landOfOooGridGfx = StageAPI.GridGfx()
+    local landOfOooRoomGfx = StageAPI.RoomGfx(landOfOooBackdrop, landOfOooGridGfx)
+    
+    -- Configuração visual: Infinity Castle
+    local infinityCastleBackdrop = {
+        NFloors = {"gfx/backdrop/infinity_castle/nfloor.png"},
+        LFloors = {"gfx/backdrop/infinity_castle/lfloor.png"},
+        Walls = {"gfx/backdrop/infinity_castle/wall.png"},
+        Corners = {"gfx/backdrop/infinity_castle/corner.png"}
+    }
+    local infinityCastleGridGfx = StageAPI.GridGfx()
+    local infinityCastleRoomGfx = StageAPI.RoomGfx(infinityCastleBackdrop, infinityCastleGridGfx)
+    
+    -- Cria o andar customizado 1 (Land of Ooo)
+    AdventureDimension = StageAPI.CustomStage("AdventureDimension")
+    AdventureDimension:SetDisplayName("Land of Ooo")
+    AdventureDimension:SetRooms(landOfOooRoomsList)
+    AdventureDimension:SetRoomGfx(landOfOooRoomGfx, {RoomType.ROOM_DEFAULT, RoomType.ROOM_BOSS})
+    
+    -- Cria o andar customizado 2 (Infinity Castle)
+    DemonDimension = StageAPI.CustomStage("DemonDimension")
+    DemonDimension:SetDisplayName("Infinity Castle")
+    DemonDimension:SetRooms(infinityCastleRoomsList)
+    DemonDimension:SetRoomGfx(infinityCastleRoomGfx, {RoomType.ROOM_DEFAULT, RoomType.ROOM_BOSS})
+    
+    log("Andares Land of Ooo e Infinity Castle registrados com layouts iniciais e RoomGfx.")
+else
+    log("AVISO: StageAPI não encontrado. Portais usarão teleporte temporário.")
+end
 
 mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, function(_, isSave)
     log("Dimensional Doors inicializado.")
-    if StageAPI and StageAPI.Loaded then
-        log("StageAPI carregado com sucesso!")
-        if not RickDimension then
-            -- Cria o andar customizado
-            RickDimension = StageAPI.CustomStage("RickDimension")
-            RickDimension:SetDisplayName("Rick's Dimension")
-            
-            -- Cria os layouts minimos para o andar nao crashar
-            local roomLayout = StageAPI.Room({
-                Width = 13, Height = 7,
-                SpawnEntities = {}
-            })
-            local roomList = StageAPI.RoomList()
-            roomList:AddRoom(roomLayout)
-            RickDimension:SetRooms(roomList)
-            
-            log("Andar RickDimension registrado.")
-        end
-    else
-        log("AVISO: StageAPI não encontrado. O andar novo não vai funcionar!")
-    end
 end)
+
+-- ============================================================
+-- Função reutilizável: Spawnar os dois portais
+-- ============================================================
+local function spawnPortals(centerPos)
+    -- Portal Land of Ooo (Adventure Time)
+    local portal1 = Isaac.Spawn(EntityType.ENTITY_EFFECT, PORTAL_VARIANT, 0, centerPos + Vector(-60, 0), Vector.Zero, nil)
+    local spr1 = portal1:GetSprite()
+    spr1:Load("gfx/grid/portal_land_of_ooo.anm2", true)
+    spr1:Play("Idle", true)
+    spr1.FlipX = false
+    spr1.FlipY = false
+    portal1.SortingLayer = SortingLayer.SORTING_BACKGROUND
+    portal1:GetData().portalType = "blue"
+    
+    -- Portal Infinity Castle (Demon Slayer)
+    local portal2 = Isaac.Spawn(EntityType.ENTITY_EFFECT, PORTAL_VARIANT, 0, centerPos + Vector(60, 0), Vector.Zero, nil)
+    local spr2 = portal2:GetSprite()
+    spr2:Load("gfx/grid/portal_infinity_castle.anm2", true)
+    spr2:Play("Idle", true)
+    spr2.FlipX = false
+    spr2.FlipY = false
+    portal2.SortingLayer = SortingLayer.SORTING_BACKGROUND
+    portal2:GetData().portalType = "orange"
+    
+    log("Portais Land of Ooo e Infinity Castle spawnados.")
+    return portal1, portal2
+end
+
+-- ============================================================
+-- Função: Teleportar para dimensão
+-- ============================================================
+local function teleportToDimension(portal)
+    local data = portal:GetData()
+    
+    if data.portalType == "orange" then
+        -- Infinity Castle (Demon Slayer)
+        if StageAPI and StageAPI.Loaded and DemonDimension then
+            StageAPI.GotoCustomStage(DemonDimension, false)
+        else
+            -- Teleporte temporário enquanto StageAPI não tá configurado
+            Isaac.ExecuteCommand("stage 7")
+            log("(Usando teleporte temporário - StageAPI não disponível)")
+        end
+        portal:Remove()
+        log("Teleportando para a Infinity Castle (Demon Slayer)...")
+    else
+        -- Land of Ooo (Adventure Time)
+        if StageAPI and StageAPI.Loaded and AdventureDimension then
+            StageAPI.GotoCustomStage(AdventureDimension, false)
+        else
+            -- Teleporte temporário enquanto StageAPI não tá configurado
+            Isaac.ExecuteCommand("stage 5")
+            log("(Usando teleporte temporário - StageAPI não disponível)")
+        end
+        portal:Remove()
+        log("Teleportando para a Land of Ooo (Adventure Time)...")
+    end
+end
 
 -- ============================================================
 -- Spawn do Rick no quarto inicial do 1º andar
@@ -98,7 +185,7 @@ mod:AddCallback(ModCallbacks.MC_POST_UPDATE, function(_)
         local sprite, data = getRickSprite(ent)
 
         if data.rickState == "idle" then
-            local players = Isaac.FindInRadius(ent.Position, TOUCH_DISTANCE, EntityPartition.PLAYER)
+            local players = Isaac.FindInRadius(ent.Position, RICK_TOUCH_DISTANCE, EntityPartition.PLAYER)
             if #players > 0 then
                 data.rickState = "teleport"
                 sprite:Play("Teleport", true)
@@ -115,49 +202,73 @@ mod:AddCallback(ModCallbacks.MC_POST_UPDATE, function(_)
         end
     end
 
-    -- Logica de entrar no Portal (para o novo andar)
-    if StageAPI and StageAPI.Loaded and RickDimension then
-        local portals = Isaac.FindByType(EntityType.ENTITY_EFFECT, PORTAL_VARIANT, -1)
-        for _, portal in ipairs(portals) do
-            local players = Isaac.FindInRadius(portal.Position, 25, EntityPartition.PLAYER)
-            if #players > 0 then
-                -- Jogador tocou no portal: vai para a Rick Dimension
-                StageAPI.GotoCustomStage(RickDimension, false)
-                portal:Remove()
-                log("Teleportando para a Rick Dimension...")
-            end
+    -- Logica de entrar no Portal
+    local portals = Isaac.FindByType(EntityType.ENTITY_EFFECT, PORTAL_VARIANT, -1)
+    for _, portal in ipairs(portals) do
+        local players = Isaac.FindInRadius(portal.Position, PORTAL_TOUCH_DISTANCE, EntityPartition.PLAYER)
+        if #players > 0 then
+            teleportToDimension(portal)
+            break  -- Sai do loop após teleportar (evita processar múltiplos portais no mesmo frame)
         end
     end
 end)
 
--- ROTAÇÃO DOS PORTAIS: Removendo a rotação forçada e deixando o sprite original
+-- ORIENTAÇÃO DOS PORTAIS E RICK: Garantir que nunca fiquem virados
 mod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, effect)
-    if effect.Variant == PORTAL_VARIANT then
+    if effect.Variant == PORTAL_VARIANT or effect.Variant == RICK_VARIANT then
         local sprite = effect:GetSprite()
-        if sprite.Rotation ~= 0 then
-            sprite.Rotation = 0
-        end
-    end
-end, PORTAL_VARIANT)
-
--- COMANDOS PARA TESTE RÁPIDO
-mod:AddCallback(ModCallbacks.MC_EXECUTE_CMD, function(_, cmd)
-    local player = Isaac.GetPlayer(0)
-    if cmd == "rick" then
-        Isaac.Spawn(EntityType.ENTITY_EFFECT, RICK_VARIANT, 0, player.Position, Vector.Zero, nil)
-    elseif cmd == "portais" then
-        -- Mais espalhados e alinhados horizontalmente (apenas no eixo X)
-        local portal1 = Isaac.Spawn(EntityType.ENTITY_EFFECT, PORTAL_VARIANT, 0, player.Position + Vector(-60, 0), Vector.Zero, nil)
-        portal1:GetSprite():Load("gfx/grid/portal_door.anm2", true)
-        portal1:GetSprite():Play("Idle", true)
-        portal1.SortingLayer = SortingLayer.SORTING_BACKGROUND
-        
-        local portal2 = Isaac.Spawn(EntityType.ENTITY_EFFECT, PORTAL_VARIANT, 0, player.Position + Vector(60, 0), Vector.Zero, nil)
-        portal2:GetSprite():Load("gfx/grid/portal_door.anm2", true)
-        portal2:GetSprite():Play("Idle", true)
-        portal2.SortingLayer = SortingLayer.SORTING_BACKGROUND
+        sprite.Rotation = 0
+        sprite.FlipX = false
+        sprite.FlipY = false
     end
 end)
+
+-- ============================================================
+-- COMANDOS PARA TESTE RÁPIDO
+-- No console do Isaac, use: lua DD.portais()
+-- ============================================================
+DD = {}
+
+function DD.portais()
+    local room = game:GetRoom()
+    local center = room:GetCenterPos()
+    spawnPortals(center)
+end
+
+function DD.rick()
+    local player = Isaac.GetPlayer(0)
+    Isaac.Spawn(EntityType.ENTITY_EFFECT, RICK_VARIANT, 0, player.Position, Vector.Zero, nil)
+    log("Rick spawnado.")
+end
+
+function DD.gun()
+    local player = Isaac.GetPlayer(0)
+    local portalGunId = Isaac.GetItemIdByName("Portal Gun")
+    if portalGunId and portalGunId > 0 then
+        player:AddCollectible(portalGunId)
+        log("Portal Gun adicionada!")
+    else
+        log("ERRO: Portal Gun não encontrada!")
+    end
+end
+
+function DD.goto1()
+    if StageAPI and StageAPI.Loaded and AdventureDimension then
+        StageAPI.GotoCustomStage(AdventureDimension, false)
+        log("Indo para AdventureDimension")
+    else
+        log("ERRO: AdventureDimension não configurada")
+    end
+end
+
+function DD.goto2()
+    if StageAPI and StageAPI.Loaded and DemonDimension then
+        StageAPI.GotoCustomStage(DemonDimension, false)
+        log("Indo para DemonDimension")
+    else
+        log("ERRO: DemonDimension não configurada")
+    end
+end
 
 -- ============================================================
 -- SPAWN DAS PORTAS APOS O BOSS
@@ -165,7 +276,6 @@ end)
 mod:AddCallback(ModCallbacks.MC_PRE_SPAWN_CLEAN_AWARD, function()
     local room = game:GetRoom()
     if room:GetType() == RoomType.ROOM_BOSS then
-        -- Verifica se tem a portal gun
         local portalGunId = Isaac.GetItemIdByName("Portal Gun")
         local hasGun = false
         if portalGunId > 0 then
@@ -178,22 +288,9 @@ mod:AddCallback(ModCallbacks.MC_PRE_SPAWN_CLEAN_AWARD, function()
         end
 
         if hasGun then
-            -- Spawna 2 portais mais afastados um do outro, alinhados horizontalmente
             local center = room:GetCenterPos()
-            local portal1 = Isaac.Spawn(EntityType.ENTITY_EFFECT, PORTAL_VARIANT, 0, center + Vector(-60, 0), Vector.Zero, nil)
-            local portal2 = Isaac.Spawn(EntityType.ENTITY_EFFECT, PORTAL_VARIANT, 0, center + Vector(60, 0), Vector.Zero, nil)
-            
-            -- Adiciona os sprites pros portais
-            portal1:GetSprite():Load("gfx/grid/portal_door.anm2", true)
-            portal1:GetSprite():Play("Idle", true)
-            portal1.SortingLayer = SortingLayer.SORTING_BACKGROUND -- Fica atras dos personagens
-            
-            portal2:GetSprite():Load("gfx/grid/portal_door.anm2", true)
-            portal2:GetSprite():Play("Idle", true)
-            portal2.SortingLayer = SortingLayer.SORTING_BACKGROUND
-            
-            log("Portais spawnados!")
+            spawnPortals(center)
+            log("Portais spawnados apos o Boss!")
         end
     end
 end)
-
