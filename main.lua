@@ -54,6 +54,7 @@ if StageAPI and StageAPI.Loaded then
     
     -- Configuração visual: Land of Ooo
     local landOfOooBackdrop = {
+        Floors = {"gfx/backdrop/land_of_ooo/nfloor.png"},
         NFloors = {"gfx/backdrop/land_of_ooo/nfloor.png"},
         LFloors = {"gfx/backdrop/land_of_ooo/lfloor.png"},
         Walls = {"gfx/backdrop/land_of_ooo/wall.png"},
@@ -64,6 +65,7 @@ if StageAPI and StageAPI.Loaded then
     
     -- Configuração visual: Infinity Castle
     local infinityCastleBackdrop = {
+        Floors = {"gfx/backdrop/infinity_castle/nfloor.png"},
         NFloors = {"gfx/backdrop/infinity_castle/nfloor.png"},
         LFloors = {"gfx/backdrop/infinity_castle/lfloor.png"},
         Walls = {"gfx/backdrop/infinity_castle/wall.png"},
