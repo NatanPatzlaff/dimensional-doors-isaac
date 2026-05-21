@@ -81,11 +81,12 @@ def slice_and_generate():
         else:
             print(f"AVISO: {nfloor_backup_path} não encontrado, pulando nfloor.png")
             
-        # 4. GERAR O OVERLAY DO CHÃO (lfloor.png) - 520x416 por espelhamento do lfloor.png atual
+        # 4. GERAR O OVERLAY DO CHÃO (lfloor.png) - 520x416 por espelhamento do lfloor_clean.png
+        lfloor_clean_path = os.path.join(ooo_dir, "lfloor_clean.png")
         lfloor_path = os.path.join(ooo_dir, "lfloor.png")
-        if os.path.exists(lfloor_path):
-            print(f"Carregando {lfloor_path} para gerar versão espelhada...")
-            with Image.open(lfloor_path) as lfloor_orig:
+        if os.path.exists(lfloor_clean_path):
+            print(f"Carregando {lfloor_clean_path} para gerar versão espelhada...")
+            with Image.open(lfloor_clean_path) as lfloor_orig:
                 lfloor_orig = lfloor_orig.convert("RGBA")
                 
                 # Extrair quadrante superior esquerdo (260x208) como base
@@ -109,7 +110,7 @@ def slice_and_generate():
                 lfloor_img.save(lfloor_path, "PNG")
                 print(f"Sucesso: {lfloor_path} gerado com espelhamento contínuo!")
         else:
-            print(f"AVISO: {lfloor_path} não encontrado, pulando lfloor.png")
+            print(f"AVISO: {lfloor_clean_path} não encontrado, pulando lfloor.png")
 
 if __name__ == "__main__":
     slice_and_generate()
