@@ -53,23 +53,23 @@ if StageAPI and StageAPI.Loaded then
     local infinityCastleRoomsList = StageAPI.RoomsList("InfinityCastleRooms", infinityCastleRooms)
     
     -- Configuração visual: Land of Ooo
+    -- O StageAPI espera spritesheets no formato vanilla (468x468), igual ao 01_Basement.png.
+    -- O WallBackdrop.anm2 e FloorBackdrop.anm2 internos do StageAPI fazem os crops corretos
+    -- automaticamente a partir desse formato. Não é necessário fatiar manualmente.
     local landOfOooBackdrop = {
-        Floors = {"gfx/backdrop/land_of_ooo/nfloor.png"},
-        NFloors = {"gfx/backdrop/land_of_ooo/nfloor.png"},
-        LFloors = {"gfx/backdrop/land_of_ooo/lfloor.png"},
-        Walls = {"gfx/backdrop/land_of_ooo/wall.png"},
-        Corners = {"gfx/backdrop/land_of_ooo/corner.png"}
+        -- [TESTE] Design sem nome (1).png convertido para 468x468 RGBA
+        Walls   = {"gfx/backdrop/land_of_ooo/ooo_test.png"},
+        Floors  = {"gfx/backdrop/land_of_ooo/ooo_test.png"},
+        -- Para voltar ao original: trocar ooo_test.png por vanilla_style.png
     }
     local landOfOooGridGfx = StageAPI.GridGfx()
     local landOfOooRoomGfx = StageAPI.RoomGfx(landOfOooBackdrop, landOfOooGridGfx)
     
     -- Configuração visual: Infinity Castle
+    -- castle_style.png gerado a partir do nfloor_backup.png redimensionado para 468x468.
     local infinityCastleBackdrop = {
-        Floors = {"gfx/backdrop/infinity_castle/nfloor.png"},
-        NFloors = {"gfx/backdrop/infinity_castle/nfloor.png"},
-        LFloors = {"gfx/backdrop/infinity_castle/lfloor.png"},
-        Walls = {"gfx/backdrop/infinity_castle/wall.png"},
-        Corners = {"gfx/backdrop/infinity_castle/corner.png"}
+        Walls   = {"gfx/backdrop/infinity_castle/castle_style.png"},  -- spritesheet 468x468
+        Floors  = {"gfx/backdrop/infinity_castle/castle_style.png"},  -- spritesheet 468x468
     }
     local infinityCastleGridGfx = StageAPI.GridGfx()
     local infinityCastleRoomGfx = StageAPI.RoomGfx(infinityCastleBackdrop, infinityCastleGridGfx)
